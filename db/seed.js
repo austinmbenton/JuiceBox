@@ -15,7 +15,10 @@ async function dropTables() {
   try {
     console.log("Starting to drop tables...");
 
+    // have to make sure to drop in correct order
     await client.query(`
+      DROP TABLE IF EXISTS post_tags;
+      DROP TABLE IF EXISTS tags;
       DROP TABLE IF EXISTS posts;
       DROP TABLE IF EXISTS users;
     `);
@@ -40,6 +43,7 @@ async function createTables() {
         location varchar(255) NOT NULL,
         active boolean DEFAULT true
       );
+
       CREATE TABLE posts (
         id SERIAL PRIMARY KEY,
         "authorId" INTEGER REFERENCES users(id),
@@ -47,10 +51,12 @@ async function createTables() {
         content TEXT NOT NULL,
         active BOOLEAN DEFAULT true
       );
+
       CREATE TABLE tags (
         id SERIAL PRIMARY KEY,
         name varchar(255) UNIQUE NOT NULL
       );
+
       CREATE TABLE post_tags (
         "postId" INTEGER REFERENCES posts(id),
         "tagId" INTEGER REFERENCES tags(id),
@@ -103,19 +109,22 @@ async function createInitialPosts() {
     await createPost({
       authorId: albert.id,
       title: "Name Change",
-      content: "Things have been getting pretty serious with the new business I'm running. Thinking about changing my name to something a little more threateing... Let me know what you guys think!"
+      content: "Things have been getting pretty serious with the new business I'm running. Thinking about changing my name to something a little more threateing... Let me know what you guys think!",
+      tags: ["#happy", "#youcandoanything", "#canmandoeverything"]
     });
 
     await createPost({
       authorId: sandra.id,
       title: "What was that song Mr. Krabs likes?",
-      content: "Went a little something like this, Bee boo boo bop bee boo boo bee bop bee boo boo bee bop. If you know it, let me know! "
+      content: "Went a little something like this, Bee boo boo bop bee boo boo bee bop bee boo boo bee bop. If you know it, let me know! ",
+      tags: ["#happy", "#youcandoanything"]
     });
 
     await createPost({
       authorId: glamgal.id,
       title: "Scarlet Eyes",
-      content: "Looking for the Scarlet Eyed person. Looking for all information leading to his location."
+      content: "Looking for the Scarlet Eyed person. Looking for all information leading to his location.",
+      tags: ["#happy", "#worst-day-ever"]
     });
     console.log("Finished creating posts!");
   } catch (error) {
@@ -148,8 +157,8 @@ async function testDB() {
 
     console.log("Calling updateUser on users[0]");
     const updateUserResult = await updateUser(users[0].id, {
-      name: "Scarface",
-      location: "Miami, Florida"
+      name: "Newname Sogood",
+      location: "Lesterville, KY"
     });
     console.log("Result:", updateUserResult);
 
@@ -181,7 +190,6 @@ async function testDB() {
     console.log("Calling getPostsByTagName with #happy");
     const postsWithHappy = await getPostsByTagName("#happy");
     console.log("Result:", postsWithHappy);
-
 
     console.log("Finished database tests!");
   } catch (error) {
